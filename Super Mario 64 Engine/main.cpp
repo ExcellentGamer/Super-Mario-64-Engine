@@ -97,7 +97,7 @@ int main() {
 	std::string texPath = "/textures/";
 
 	// Manage Textures
-	Texture grass((parentDir + texPath + "grass.png").c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	Texture grass((parentDir + texPath + "grass.rgba16.png").c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	grass.texUnit(shaderProgram, "tex0", 0);
 
 
