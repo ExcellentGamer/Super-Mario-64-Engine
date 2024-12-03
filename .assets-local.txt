@@ -1,0 +1,23 @@
+# This file tracks the assets currently extracted by extract_assets.py.
+6
+textures/brick.rgba16.png
+textures/carpet_fade.rgba16.png
+textures/cobble.rgba16.png
+textures/courtyard_sign.rgba16.png
+textures/fence.rgba16.png
+textures/grass.rgba16.png
+textures/grass_flowers.rgba16.png
+textures/grass_hills.rgba16.png
+textures/gravel.rgba16.png
+textures/gravel_sand.rgba16.png
+textures/metal.rgba16.png
+textures/moat.rgba16.png
+textures/path.rgba16.png
+textures/roof.rgba16.png
+textures/sand.rgba16.png
+textures/star_pattern.rgba16.png
+textures/stone_brick.rgba16.png
+textures/stone_pattern.rgba16.png
+textures/window.rgba16.png
+textures/wood.rgba16.png
+textures/wood_side.rgba16.png
