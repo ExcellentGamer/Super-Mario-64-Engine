@@ -87,6 +87,10 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	float camFov = 50.0f;
+	float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	float lightColor[4] = { 0.0f, 1.0f, 0.8f, 0.8f };
+
 	// Texture path
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 	std::string texPath = "/textures/";
@@ -118,7 +122,6 @@ int main() {
 	// Create light mesh
 	Mesh light(lightVerts, lightInd, tex);
 
-	float lightColor[4] = { 0.0f, 1.0f, 0.8f, 0.8f };
 	glm::vec3 lightPos = glm::vec3(0.0f, 0.8f, 0.0f);
 	glm::mat4 lightModel = glm::mat4(1.0f);
 	lightModel = glm::translate(lightModel, lightPos);
@@ -132,9 +135,6 @@ int main() {
 
 	// Creates camera object
 	Camera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
-
-	float camFov = 50.0f;
-	float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {
@@ -150,6 +150,9 @@ int main() {
 			ImGui::ColorEdit3("Background Color", bgColor);
 			ImGui::ColorEdit3("Light Color", lightColor);
 			ImGui::SliderFloat("Camera FOV", &camFov, 15.0f, 120.0f);
+			ImGui::SliderFloat("Light Pos X", &lightPos.x, -10.0f, 10.0f);
+			ImGui::SliderFloat("Light Pos Y", &lightPos.y, 1.0f, 10.0f);
+			ImGui::SliderFloat("Light Pos Z", &lightPos.z, -10.0f, 10.0f);
 			ImGui::End();
 		}
 
