@@ -1,6 +1,10 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -109,6 +113,12 @@ int main() {
 
 	glViewport(0, 0, windowWidth, windowHeight);
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Generates Shader object using shaders defualt.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
@@ -155,7 +165,7 @@ int main() {
 	lightVBO.Unbind();
 	lightEBO.Unbind();
 
-	glm::vec4 lightColor = glm::vec4(0.0f, 1.0f, 0.8f, 0.8f);
+	float lightColor[4] = { 0.0f, 1.0f, 0.8f, 0.8f };
 	glm::vec3 lightPos = glm::vec3(-1.0f, 0.8f, 0.5f);
 	glm::mat4 lightModel = glm::mat4(1.0f);
 	lightModel = glm::translate(lightModel, lightPos);
@@ -166,10 +176,10 @@ int main() {
 
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
-	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
 	shaderProgram.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
-	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 	// Texture path
@@ -196,8 +206,15 @@ int main() {
 		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Handles camera inputs
-		camera.Inputs(window);
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (!io.WantCaptureMouse) {
+			// Handles camera inputs
+			camera.Inputs(window);
+		}
+
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
@@ -224,11 +241,24 @@ int main() {
 		// Draw primitives, number of indices, datatype of indices, index of indices
 		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 
+		ImGui::Begin("RT64 Reference?!?!");
+		ImGui::Text("Dario is watching me...");
+		ImGui::ColorEdit4("Light Color", lightColor);
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
+
+	// End all ImGui functions
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	// Delete all the objects created
 	VAO1.Delete();
