@@ -155,8 +155,8 @@ int main() {
 	lightVBO.Unbind();
 	lightEBO.Unbind();
 
-	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 0.8f, 1.0f);
-	glm::vec3 lightPos = glm::vec3(-1.5f, 0.8f, 0.5f);
+	glm::vec4 lightColor = glm::vec4(0.0f, 1.0f, 0.8f, 0.8f);
+	glm::vec3 lightPos = glm::vec3(-1.0f, 0.8f, 0.5f);
 	glm::mat4 lightModel = glm::mat4(1.0f);
 	lightModel = glm::translate(lightModel, lightPos);
 
@@ -177,8 +177,11 @@ int main() {
 	std::string texPath = "/textures/";
 
 	// Manage Textures
-	Texture grass((parentDir + texPath + "grass.rgba16.png").c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	Texture grass((parentDir + texPath + "metal.rgba16.png").c_str(), GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 	grass.texUnit(shaderProgram, "tex0", 0);
+
+	Texture grassSpec((parentDir + texPath + "metal.rgba16.png").c_str(), GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+	grassSpec.texUnit(shaderProgram, "tex1", 1);
 
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
@@ -204,8 +207,9 @@ int main() {
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		// Export the camMatrix to the Vertex Shader of the pyramid
 		camera.Matrix(shaderProgram, "camMatrix");
-		// Binds texture so that is appears in rendering
+		// Binds textures so that they appear in the rendering
 		grass.Bind();
+		grassSpec.Bind();
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
 		// Draw primitives, number of indices, datatype of indices, index of indices
@@ -231,7 +235,12 @@ int main() {
 	VBO1.Delete();
 	EBO1.Delete();
 	grass.Delete();
+	grassSpec.Delete();
 	shaderProgram.Delete();
+	lightVAO.Delete();
+	lightVBO.Delete();
+	lightEBO.Delete();
+	lightShader.Delete();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
