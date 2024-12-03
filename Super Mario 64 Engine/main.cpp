@@ -191,52 +191,44 @@ int main() {
 	// Creates camera object
 	Camera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
 
+	float camFov = 50.0f;
+	float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {
-		// Color of Background
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		// Clean the back buffer and depth buffer
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) {
+			ImGui::Begin("RT64 Reference?!?!");
+			ImGui::Text("Dario is watching me...");
+			ImGui::ColorEdit3("Background Color", bgColor);
+			ImGui::ColorEdit3("Light Color", lightColor);
+			ImGui::SliderFloat("Camera FOV", &camFov, 15.0f, 120.0f);
+			ImGui::End();
+		}
 
 		if (!io.WantCaptureMouse) {
 			// Handles camera inputs
 			camera.Inputs(window);
 		}
 
-		// Updates and exports the camera matrix to the Vertex Shader
-		camera.updateMatrix(45.0f, 0.1f, 100.0f);
+		// Color of Background
+		glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 
-		// Tells OpenGL which Shader Program we want to use
-		shaderProgram.Activate();
-		// Exports the camera Position to the Fragment Shader for specular lighting
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-		// Export the camMatrix to the Vertex Shader of the pyramid
-		camera.Matrix(shaderProgram, "camMatrix");
+		// Clean the back buffer and depth buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// Binds textures so that they appear in the rendering
 		grass.Bind();
 		grassSpec.Bind();
+
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
+
 		// Draw primitives, number of indices, datatype of indices, index of indices
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
-
-		// Tells OpenGL which Shader Program we want to use
-		lightShader.Activate();
-		// Export the camMatrix to the Vertex Shader of the light cube
-		camera.Matrix(lightShader, "camMatrix");
-		// Bind the VAO so OpenGL knows to use it
-		lightVAO.Bind();
-		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
-
-		ImGui::Begin("RT64 Reference?!?!");
-		ImGui::Text("Dario is watching me...");
-		ImGui::ColorEdit3("Light Color", lightColor);
-		ImGui::End();
 
 		glUseProgram(lightShader.ID);
 		glUseProgram(shaderProgram.ID);
@@ -244,16 +236,36 @@ int main() {
 		lightShader.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
 		glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
+
+		// Bind the VAO so OpenGL knows to use it
+		lightVAO.Bind();
+
+		// Draw primitives, number of indices, datatype of indices, index of indices
+		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+
+		// Export the camMatrix to the Vertex Shader of the light cube
+		camera.Matrix(lightShader, "camMatrix");
+
 		shaderProgram.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+		// Updates and exports the camera matrix to the Vertex Shader
+		camera.updateMatrix(camFov, 0.1f, 100.0f);
+
+		// Exports the camera Position to the Fragment Shader for specular lighting
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+
+		// Export the camMatrix to the Vertex Shader of the pyramid
+		camera.Matrix(shaderProgram, "camMatrix");
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
+
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
